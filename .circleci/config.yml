@@ -2,7 +2,8 @@ version: 2.1
 
 orbs:
   node: circleci/node@5.0.1
-  
+  docker: circleci/docker@2.1.1  
+
 jobs: 
   build:
     docker:
@@ -14,6 +15,7 @@ jobs:
       - run: |
           echo "Install dependencies"
           npm install
+  
   test:
     docker:
       - image: cimg/node:16.10
@@ -25,6 +27,26 @@ jobs:
           echo "Running tests"
           npm run test
 
+  build-and-push:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout  
+      - setup_remote_docker:
+          version: 20.10.7  
+          docker_layer_caching: true  
+      - run:
+          name: Build Docker image
+          command: |
+            docker build -t $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 .  # Build image
+      - run:
+          name: Log in to Docker Hub
+          command: |
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin  # Login to Docker Hub
+      - run:
+          name: Push Docker image to Docker Hub
+          command: |
+            docker push $DOCKER_USERNAME/education-space:$CIRCLE_SHA1  # Push image to Docker Hub
 
 workflows:
   simple_workflow:
@@ -32,4 +54,11 @@ workflows:
       - build
       - test:
           requires:
-            - build
+            - build  
+      - build-and-push:
+          requires:
+            - test  
+          filters:
+            branches:
+              only:
+                - main  
