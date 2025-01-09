@@ -63,6 +63,17 @@ jobs:
             heroku container:push web -a az2366-su-devops
             heroku container:release web -a az2366-su-devops
 
+  publish:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: az2366/education-space
+      - docker/push:
+          image: az2366/education-space
+
 workflows:
   simple_workflow:
     jobs:
