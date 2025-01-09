@@ -73,9 +73,6 @@ workflows:
       - publish:
           requires:
             - test
-      - deploy:
-          requires:
-            - publish
       - build-and-push:
           requires:
             - test
@@ -83,4 +80,6 @@ workflows:
             branches:
               only:
                 - main
-      
+      - deploy:
+          requires:
+            - publish
