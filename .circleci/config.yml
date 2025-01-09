@@ -28,25 +28,25 @@ jobs:
           echo "Running tests"
           npm run test
 
-  build-and-push:
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: Build Docker image
-          command: |
-            docker build -t $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 .
-      - run:
-          name: Log in to Docker Hub
-          command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-      - run:
-          name: Push Docker image to Docker Hub
-          command: |
-            docker push $DOCKER_USERNAME/education-space:$CIRCLE_SHA1
+  # build-and-push:
+  #   docker:
+  #     - image: cimg/node:16.10
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         docker_layer_caching: true
+  #     - run:
+  #         name: Build Docker image
+  #         command: |
+  #           docker build -t $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 .
+  #     - run:
+  #         name: Log in to Docker Hub
+  #         command: |
+  #           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+  #     - run:
+  #         name: Push Docker image to Docker Hub
+  #         command: |
+  #           docker push $DOCKER_USERNAME/education-space:$CIRCLE_SHA1
 
   deploy:
     docker:
@@ -63,16 +63,16 @@ jobs:
             heroku container:push web -a az2366-su-devops
             heroku container:release web -a az2366-su-devops
 
-  publish:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - docker/check
-      - docker/build:
-          image: az2366/education-space
-      - docker/push:
-          image: az2366/education-space
+  # publish:
+  #   executor: docker/docker
+  #   steps:
+  #     - setup_remote_docker
+  #     - checkout
+  #     - docker/check
+  #     - docker/build:
+  #         image: az2366/education-space
+  #     - docker/push:
+  #         image: az2366/education-space
 
 workflows:
   simple_workflow:
@@ -84,13 +84,13 @@ workflows:
       - publish:
           requires:
             - test
-      - build-and-push:
-          requires:
-            - test
-          filters:
-            branches:
-              only:
-                - main
+      # - build-and-push:
+      #     requires:
+      #       - test
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
       - deploy:
           requires:
             - publish
