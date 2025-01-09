@@ -25,16 +25,6 @@ jobs:
           echo “Running tests...”
           npm run test
   
-  publish:
-    executor: docker/docker
-    steps:
-      - setup_remote_docker
-      - checkout
-      - docker/check
-      - docker/build:
-          image: az2366/education-space
-      - docker/push:
-          image: az2366/education-space
   deploy:
     docker:
         - image: cimg/node:16.10
