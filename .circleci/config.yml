@@ -2,9 +2,10 @@ version: 2.1
 
 orbs:
   node: circleci/node@5.0.1
-  docker: circleci/docker@2.1.1  
+  heroku: circleci/heroku@2.0.0
+  docker: circleci/docker@2.1.4
 
-jobs: 
+jobs:
   build:
     docker:
       - image: cimg/node:16.10
@@ -15,7 +16,7 @@ jobs:
       - run: |
           echo "Install dependencies"
           npm install
-  
+
   test:
     docker:
       - image: cimg/node:16.10
@@ -31,21 +32,36 @@ jobs:
     docker:
       - image: cimg/node:16.10
     steps:
-      - checkout  
+      - checkout
       - setup_remote_docker:
-          docker_layer_caching: true  
+          docker_layer_caching: true
       - run:
           name: Build Docker image
           command: |
-            docker build -t $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 .  
+            docker build -t $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 .
       - run:
           name: Log in to Docker Hub
           command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin 
+            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
       - run:
           name: Push Docker image to Docker Hub
           command: |
-            docker push $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 
+            docker push $DOCKER_USERNAME/education-space:$CIRCLE_SHA1
+
+    deploy:
+      docker:
+        -image: cimg/node:16.10
+      steps:
+        - setup_remote_docker
+        - heroku/install
+        - checkout
+        - run:
+            name: Heroku Container Push
+            command: |
+              heroku container:login
+              heroku stack:set container -a az2366-su-devops
+              heroku container:push web -a az2366-su-devops
+              heroku container:release web -a az2366-su-devops
 
 workflows:
   simple_workflow:
@@ -53,11 +69,17 @@ workflows:
       - build
       - test:
           requires:
-            - build  
+            - build
+      - publish:
+          requires:
+            - test
+      - deploy:
+          requires:
+            - publish
       - build-and-push:
           requires:
-            - test  
+            - test
           filters:
             branches:
               only:
-                - main  
+                - main
