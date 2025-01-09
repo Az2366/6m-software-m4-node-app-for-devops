@@ -28,25 +28,25 @@ jobs:
           echo "Running tests"
           npm run test
 
-  build-and-push:
-    docker:
-      - image: cimg/node:16.10
-    steps:
-      - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - run:
-          name: Build Docker image
-          command: |
-            docker build -t $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 .
-      - run:
-          name: Log in to Docker Hub
-          command: |
-            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-      - run:
-          name: Push Docker image to Docker Hub
-          command: |
-            docker push $DOCKER_USERNAME/education-space:$CIRCLE_SHA1
+  # build-and-push:
+  #   docker:
+  #     - image: cimg/node:16.10
+  #   steps:
+  #     - checkout
+  #     - setup_remote_docker:
+  #         docker_layer_caching: true
+  #     - run:
+  #         name: Build Docker image
+  #         command: |
+  #           docker build -t $DOCKER_USERNAME/education-space:$CIRCLE_SHA1 .
+  #     - run:
+  #         name: Log in to Docker Hub
+  #         command: |
+  #           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+  #     - run:
+  #         name: Push Docker image to Docker Hub
+  #         command: |
+  #           docker push $DOCKER_USERNAME/education-space:$CIRCLE_SHA1
 
     deploy:
       docker:
@@ -76,10 +76,10 @@ workflows:
       - deploy:
           requires:
             - publish
-      - build-and-push:
-          requires:
-            - test
-          filters:
-            branches:
-              only:
-                - main
+      # - build-and-push:
+      #     requires:
+      #       - test
+      #     filters:
+      #       branches:
+      #         only:
+      #           - main
