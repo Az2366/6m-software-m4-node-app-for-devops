@@ -73,13 +73,14 @@ workflows:
       - publish:
           requires:
             - test
-      - deploy:
+      
+      - build-and-push:
           requires:
-            - publish
-      # - build-and-push:
-      #     requires:
-      #       - test
-      #     filters:
-      #       branches:
-      #         only:
-      #           - main
+            - test
+          filters:
+            branches:
+              only:
+                - main
+      - deploy:
+        requires:
+          - publish
