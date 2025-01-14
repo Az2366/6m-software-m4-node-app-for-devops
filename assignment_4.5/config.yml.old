@@ -60,7 +60,7 @@ workflows:
           requires:
             - test
       - build-and-push:
-          requires:
+          requires:0
             - test
           filters:
             branches:
